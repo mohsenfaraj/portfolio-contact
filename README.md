@@ -1,6 +1,6 @@
 # Contact Form Email Worker
 
-This Cloudflare Worker receives contact form submissions via a POST request, sends an email with the submitted details (name, email, message), and handles CORS. The email is formatted with a table for readability, and inputs are sanitized to prevent XSS attacks.
+If you have a contact form on your website and you want contact data (name, email, message) to come as form of an email to you, then you have found the right project. this is a cloudflare worker to email you when it receive a contact form from its endpoint.
 
 ## Features
 
@@ -9,58 +9,39 @@ This Cloudflare Worker receives contact form submissions via a POST request, sen
 - **HTML Email Formatting**: Formats the email with a table to display form details neatly.
 - **Input Escaping**: Escapes user inputs to prevent potential XSS attacks in the email content.
 
-## Environment Requirements
+## Setup and deploy
 
-To use this worker, you need a Cloudflare account with access to Cloudflare Email Workers. Ensure that the following environment variables are configured (in wrangler.toml)
+First you need a cloudflare account with email routing on (which requires you to have a domain, custom email address and verified destination address).
 
-- `SEB`: The Cloudflare Email Worker binding.
+If these requirements are met clone this repo, open the `wrangler.toml` file and update the `destination_address`, `NAME`, `SENDER` and `RECIPIENT` with your email, name of your website, the custom email address you created in cloudflare and your email address again.
 
-## Code Structure
+After updating you could run these commands
 
-### Functions
+```bash
+# for installing required packages (you could use pnpm too)
+npm install
 
-- `handleCors(request: Request): Headers`: Sets the CORS headers for the response.
-- `escapeHtml(unsafe: string): string`: Escapes HTML special characters and converts newlines into `<br />`.
-- `sendEmail(env: Env, sender: string, recipient: string, name: string, email: string, messageBody: string): Promise<void>`: Sends an email with the contact form details formatted as an HTML table.
+# for testing in wrangler remote mode:
+npx wrangler dev --test
 
-### `fetch` Event Handler
+#for deploy in cloudflare:
+npx wrangler deploy
+```
 
-Handles POST requests to process contact form submissions and sends an email. If the request is an `OPTIONS` request, it returns appropriate CORS headers.
+note that wrangler only runs in local with the `--remote` flag for sending email.
 
-### Request Structure
+you could change the CORS settings to only allow your own website from `src/index.ts`.
 
-The worker expects a POST request with a JSON payload containing the following fields:
+## Form structure
 
-- `name`: The name of the person submitting the form.
-- `email`: The email of the person submitting the form.
-- `message`: The content of the message.
+After you deployed your project to cloudflare you can get the address of deployed worker and send a POST request in form of JSON to it.
 
-Example JSON payload:
+this is an example of request body:
 
 ```json
 {
-	"name": "John Doe",
-	"email": "johndoe@example.com",
-	"message": "Hello, I am interested in your services."
+	"name": "name",
+	"email": "email@example.com",
+	"message": "Hello There!"
 }
 ```
-
-## Usage
-
-1. Clone this repository or add the code to your existing Cloudflare Worker project.
-
-2. Install the necessary dependencies and use `wrangler` to deploy the worker:
-
-   ```bash
-   wrangler publish
-   ```
-
-3. Update the sender and recipient email addresses in the `sendEmail` function.
-
-4. Configure CORS as needed, or update the headers in the `handleCors` function.
-
-5. Your contact form can now send a POST request to the worker’s endpoint with the form details, and it will send an email containing those details.
-
-## Example Email Format
-
-The email will be sent in an HTML table for better readability, containing the sender's name, email, and message.

@@ -5,6 +5,9 @@ interface Env {
 	SEB: {
 		send: (msg: EmailMessage) => Promise<void>;
 	};
+	NAME: string;
+	SENDER: string;
+	RECIPIENT: string;
 }
 
 // Function to set CORS headers
@@ -33,7 +36,7 @@ function escapeHtml(unsafe: string): string {
 // Email sending logic
 async function sendEmail(env: Env, sender: string, recipient: string, name: string, email: string, messageBody: string): Promise<void> {
 	const msg = createMimeMessage();
-	msg.setSender({ name: 'MohsenFaraj.ir', addr: sender });
+	msg.setSender({ name: env.NAME, addr: sender });
 	msg.setRecipient(recipient);
 	msg.setSubject('New Contact Form Submission');
 
@@ -101,8 +104,8 @@ export default {
 			}
 
 			// Replace with actual sender/recipient emails
-			const sender = 'contact@mohsenfaraj.ir';
-			const recipient = 'gmohsenfarajollahi@gmail.com';
+			const sender = env.SENDER;
+			const recipient = env.RECIPIENT;
 
 			await sendEmail(env, sender, recipient, name, email, message);
 
